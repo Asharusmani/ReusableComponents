@@ -1,132 +1,342 @@
 import { useState } from 'react'
+import Navbar  from './components/ui/Navbar/Navbar'
+import Button  from './components/ui/Button/Button'
+import Modal   from './components/ui/Modal/Modal'
+import Drawer  from './components/ui/Drawer/Drawer'
+import Card    from './components/ui/Card/Card'
+import MenuBar from './components/ui/MenuBar/MenuBar'
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');`
+// ─── Google Fonts inject ───────────────────────────────────────────────
+const fontLink = document.createElement('link')
+fontLink.rel = 'stylesheet'
+fontLink.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap'
+document.head.appendChild(fontLink)
 
-export default function ComponentShowcase() {
-  const [activeDrawerItem, setActiveDrawerItem] = useState('Dashboard')
+// ─── Data ──────────────────────────────────────────────────────────────
+const menuItems = [
+  { icon: '⊙', label: 'My Profile',    shortcut: '⌘P', onClick: () => {} },
+  { icon: '◈', label: 'Workspace',     shortcut: '⌘W', onClick: () => {} },
+  {
+    icon: '◐', label: 'Appearance',
+    children: [
+      { label: 'Light',  onClick: () => {} },
+      { label: 'Dark',   onClick: () => {} },
+      { label: 'System', onClick: () => {} },
+    ],
+  },
+  { icon: '◎', label: 'Notifications', badge: '4',    onClick: () => {} },
+  { type: 'divider' },
+  { icon: '⊘', label: 'Sign Out',      danger: true,  onClick: () => {} },
+]
+
+const stats = [
+  { label: 'Components',    value: '6',    sub: 'Production ready'  },
+  { label: 'Props Covered', value: '40+',  sub: 'Fully documented'  },
+  { label: 'Bundle Size',   value: '~8kb', sub: 'Tree-shakeable'    },
+  { label: 'Dependencies',  value: '2',    sub: 'clsx + prop-types' },
+]
+
+const components = [
+  {
+    name: 'Button',
+    desc: '5 variants, 3 sizes, loading & disabled states. Full width support included.',
+    props: ['variant', 'size', 'loading', 'disabled', 'fullWidth'],
+    color: 'indigo',
+  },
+  {
+    name: 'Navbar',
+    desc: 'Sticky top navigation with mobile hamburger menu and custom action slot.',
+    props: ['logo', 'links', 'actions', 'sticky'],
+    color: 'violet',
+  },
+  {
+    name: 'Modal',
+    desc: 'Focus-trapped dialog with ESC key, backdrop click, and custom footer support.',
+    props: ['isOpen', 'onClose', 'title', 'size', 'footer'],
+    color: 'sky',
+  },
+  {
+    name: 'Drawer',
+    desc: 'Slide-in panel from any of four directions with smooth CSS transitions.',
+    props: ['isOpen', 'onClose', 'position', 'width'],
+    color: 'teal',
+  },
+  {
+    name: 'Card',
+    desc: 'Composable container with hover lift, header actions, and three padding sizes.',
+    props: ['title', 'subtitle', 'hoverable', 'headerAction', 'padding'],
+    color: 'emerald',
+  },
+  {
+    name: 'MenuBar',
+    desc: 'Recursive dropdown with nested submenus, keyboard shortcut hints, and badges.',
+    props: ['items', 'trigger', 'position'],
+    color: 'amber',
+  },
+]
+
+const colorMap = {
+  indigo:  { pill: 'bg-indigo-50 text-indigo-600',   dot: 'bg-indigo-500',   ring: 'ring-indigo-100'  },
+  violet:  { pill: 'bg-violet-50 text-violet-600',   dot: 'bg-violet-500',   ring: 'ring-violet-100'  },
+  sky:     { pill: 'bg-sky-50 text-sky-600',         dot: 'bg-sky-500',      ring: 'ring-sky-100'     },
+  teal:    { pill: 'bg-teal-50 text-teal-600',       dot: 'bg-teal-500',     ring: 'ring-teal-100'    },
+  emerald: { pill: 'bg-emerald-50 text-emerald-600', dot: 'bg-emerald-500',  ring: 'ring-emerald-100' },
+  amber:   { pill: 'bg-amber-50 text-amber-600',     dot: 'bg-amber-500',    ring: 'ring-amber-100'   },
+}
+
+// ─── App ───────────────────────────────────────────────────────────────
+export default function App() {
+  const [modalOpen,  setModalOpen]  = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
-    <>
-      <style>{FONTS}</style>
-      <style>{styles}</style>
+    <div style={{ fontFamily: "'Sora', sans-serif" }} className="min-h-screen bg-white text-gray-900">
 
-      <div className="page">
+      {/* ── NAVBAR ─────────────────────────────────────────────────── */}
+      <Navbar
+        sticky
+        className="border-b border-gray-100"
+        logo={
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center flex-shrink-0">
+              <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                <rect x="2" y="2" width="5" height="5" rx="1.5" fill="white"/>
+                <rect x="9" y="2" width="5" height="5" rx="1.5" fill="white" opacity="0.5"/>
+                <rect x="2" y="9" width="5" height="5" rx="1.5" fill="white" opacity="0.5"/>
+                <rect x="9" y="9" width="5" height="5" rx="1.5" fill="white"/>
+              </svg>
+            </div>
+            <span className="font-semibold text-gray-900 text-[15px] tracking-tight">UIKit</span>
+          </div>
+        }
+        links={[
+          { label: 'Components', href: '#components' },
+          { label: 'Docs',       href: '#' },
+          { label: 'GitHub',     href: '#' },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <MenuBar
+              items={menuItems}
+              position="bottom-right"
+              trigger={
+                <div className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center cursor-pointer ring-2 ring-white">
+                  <span className="text-xs font-semibold text-gray-600">AH</span>
+                </div>
+              }
+            />
+            <Button size="sm" variant="ghost" onClick={() => setDrawerOpen(true)}>
+              Browse
+            </Button>
+            <Button size="sm" onClick={() => setModalOpen(true)}>
+              Get Started →
+            </Button>
+          </div>
+        }
+      />
 
-        {/* HERO */}
-        <div className="hero">
-          <div className="hero-badge"><span className="badge-dot" />Component Library v1.0</div>
-          <h1>Build faster with<br /><em>reusable</em> components</h1>
-          <p>React + Vite + Tailwind CSS. Har component fully customizable aur production-ready hai.</p>
-          <div className="hero-chips">
-            {['React 18', 'Tailwind CSS', 'Vite', '5 Components'].map(c => (
-              <span key={c} className="chip">{c}</span>
+      {/* ── HERO ───────────────────────────────────────────────────── */}
+      <section className="max-w-5xl mx-auto px-6 pt-24 pb-20">
+        <div className="max-w-2xl">
+
+          <div className="flex items-center gap-2 mb-6">
+            <span
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 border border-gray-200 rounded-full px-3 py-1"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+              v1.0.0 — stable
+            </span>
+          </div>
+
+          <h1 className="text-[3.25rem] font-bold leading-[1.1] tracking-[-0.03em] text-gray-900 mb-6">
+            UI components,<br />
+            <span className="text-gray-400">built to ship.</span>
+          </h1>
+
+          <p className="text-[1.05rem] text-gray-500 leading-[1.75] mb-10 max-w-lg">
+            Six carefully crafted React components. Props-driven, accessible, dependency-light.
+            Drop them in and focus on what makes your product unique.
+          </p>
+
+          <div className="flex items-center gap-3">
+            <Button size="lg" onClick={() => setModalOpen(true)}>
+              View Demo
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => setDrawerOpen(true)}>
+              Browse Components
+            </Button>
+          </div>
+
+          <div className="mt-10 inline-flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+            <span className="text-gray-300 text-xs select-none">$</span>
+            <code
+              className="text-xs text-gray-600"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              import {'{ Button, Modal, Card }'} from './components/ui'
+            </code>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── STATS ──────────────────────────────────────────────────── */}
+      <section className="border-y border-gray-100 bg-gray-50/60">
+        <div className="max-w-5xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 rounded-2xl overflow-hidden">
+            {stats.map(({ label, value, sub }) => (
+              <div key={label} className="bg-white px-6 py-6">
+                <p className="text-[2rem] font-bold tracking-tight text-gray-900 mb-1">{value}</p>
+                <p className="text-sm font-medium text-gray-700 mb-0.5">{label}</p>
+                <p className="text-xs text-gray-400">{sub}</p>
+              </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* BUTTONS */}
-        <Divider label="Button" />
-        <div className="card">
-          <p className="section-title">Variants</p>
-          <div className="btn-grid" style={{ marginBottom: '1rem' }}>
-            <button className="btn btn-primary">Primary</button>
-            <button className="btn btn-secondary">Secondary</button>
-            <button className="btn btn-outline">Outline</button>
-            <button className="btn btn-ghost">Ghost</button>
-            <button className="btn btn-danger">Danger</button>
-          </div>
+      {/* ── COMPONENT GRID ─────────────────────────────────────────── */}
+      <section id="components" className="max-w-5xl mx-auto px-6 py-20">
 
-          <p className="section-title">Sizes</p>
-          <div className="btn-grid" style={{ marginBottom: '1rem' }}>
-            <button className="btn btn-primary btn-sm">Small</button>
-            <button className="btn btn-primary">Medium</button>
-            <button className="btn btn-primary btn-lg">Large</button>
-          </div>
-
-          <p className="section-title">Props</p>
-          <table className="props-table">
-            <thead>
-              <tr>
-                <th>Prop</th><th>Type</th><th>Default</th><th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['variant', 'string', 'primary', 'primary · secondary · outline · ghost · danger'],
-                ['size',    'string', 'md',      'sm · md · lg'],
-                ['loading', 'bool',   'false',   'Spinner show karta hai, disabled bhi ho jata'],
-                ['fullWidth','bool',  'false',   'Width 100% ho jati hai'],
-              ].map(([prop, type, def, desc]) => (
-                <tr key={prop}>
-                  <td>{prop}</td>
-                  <td><span className="type-badge">{type}</span></td>
-                  <td>{def}</td>
-                  <td>{desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mb-12">
+          <p
+            className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400 mb-3"
+            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          >
+            Components
+          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+            Everything you need,<br />nothing you don't.
+          </h2>
         </div>
 
-        {/* NAVBAR */}
-        <Divider label="Navbar" />
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div className="navbar-inner">
-            <span className="nav-logo">UIKit</span>
-            <div className="nav-links">
-              {['Home', 'Components', 'Docs'].map((l, i) => (
-                <a key={l} className={`nav-link${i === 0 ? ' active' : ''}`} href="#">{l}</a>
-              ))}
-            </div>
-            <div className="nav-actions">
-              <button className="btn btn-outline btn-sm">Sign In</button>
-              <button className="btn btn-primary btn-sm">Sign Up</button>
-            </div>
-          </div>
-          <div className="navbar-body">
-            <div className="nb-dot" /><div className="nb-dot" /><div className="nb-dot" />
-            <span style={{ marginLeft: 4 }}>sticky · logo · links · actions props support karta hai</span>
-          </div>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {components.map(({ name, desc, props, color }) => {
+            const c = colorMap[color]
+            return (
+              <Card key={name} hoverable padding="lg">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-9 h-9 rounded-xl ${c.pill} flex items-center justify-center ring-4 ${c.ring}`}>
+                    <span className={`w-2 h-2 rounded-full ${c.dot}`} />
+                  </div>
+                  <span
+                    className={`text-[11px] font-semibold uppercase tracking-wider ${c.pill} px-2.5 py-1 rounded-full`}
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {name}
+                  </span>
+                </div>
 
-        {/* MODAL + DRAWER */}
-        <Divider label="Modal & Drawer" />
-        <div className="row2">
-          {/* Modal */}
-          <div>
-            <p className="section-title" style={{ marginBottom: '.6rem' }}>Modal</p>
-            <div className="modal-outer">
-              <div className="modal-box">
-                <div className="modal-head">
-                  <span className="modal-title">Confirm Action</span>
-                  <div className="modal-x">×</div>
+                <p className="text-sm text-gray-600 leading-relaxed mb-4">{desc}</p>
+
+                <div className="flex flex-wrap gap-1.5 pt-3 border-t border-gray-50">
+                  {props.map(p => (
+                    <span
+                      key={p}
+                      className="text-[11px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md"
+                      style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                      {p}
+                    </span>
+                  ))}
                 </div>
-                <div className="modal-body-preview">
-                  Are you sure you want to proceed? This action cannot be undone.
-                </div>
-                <div className="modal-foot">
-                  <button className="btn btn-outline btn-sm">Cancel</button>
-                  <button className="btn btn-primary btn-sm">Confirm</button>
-                </div>
+              </Card>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ── INTERACTIVE PREVIEW ────────────────────────────────────── */}
+      <section className="bg-gray-50 border-y border-gray-100">
+        <div className="max-w-5xl mx-auto px-6 py-20">
+
+          <div className="mb-10">
+            <p
+              className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-400 mb-3"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              Interactive
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Try them live.</h2>
+          </div>
+
+          {/* Button showcase */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-4">
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-sm font-semibold text-gray-700">Button</p>
+              <span
+                className="text-xs text-gray-400"
+                style={{ fontFamily: "'JetBrains Mono', monospace" }}
+              >
+                variant · size · state
+              </span>
+            </div>
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <Button variant="primary">Primary</Button>
+                <Button variant="secondary">Secondary</Button>
+                <Button variant="outline">Outline</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="danger">Danger</Button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-50">
+                <Button size="sm">Small</Button>
+                <Button size="md">Medium</Button>
+                <Button size="lg">Large</Button>
+                <Button loading size="sm">Loading</Button>
+                <Button disabled size="sm">Disabled</Button>
               </div>
             </div>
           </div>
 
-          {/* Drawer */}
-          <div>
-            <p className="section-title" style={{ marginBottom: '.6rem' }}>Drawer</p>
-            <div className="drawer-outer">
-              <div className="drawer-panel">
-                <div className="drawer-head">
-                  <span className="drawer-title">Navigation</span>
-                  <div className="modal-x">×</div>
+          {/* Modal + Drawer clickable previews */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div
+              className="bg-white rounded-2xl border border-gray-100 p-6 cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all group"
+              onClick={() => setModalOpen(true)}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-semibold text-gray-700">Modal</p>
+                <span className="text-xs text-gray-400 group-hover:text-indigo-500 transition-colors">
+                  Click to open →
+                </span>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4 pointer-events-none select-none">
+                <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-50">
+                    <span className="text-xs font-medium text-gray-700">Confirm Action</span>
+                    <span className="text-gray-300 text-sm leading-none">✕</span>
+                  </div>
+                  <div className="px-4 py-3">
+                    <p className="text-xs text-gray-400 mb-3">Are you sure you want to proceed?</p>
+                    <div className="flex justify-end gap-2">
+                      <span className="text-xs border border-gray-200 px-2.5 py-1 rounded-lg text-gray-500">Cancel</span>
+                      <span className="text-xs bg-gray-900 text-white px-2.5 py-1 rounded-lg">Confirm</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="drawer-nav">
-                  {['Dashboard', 'Users', 'Products', 'Orders', 'Settings'].map(item => (
+              </div>
+            </div>
+
+            <div
+              className="bg-white rounded-2xl border border-gray-100 p-6 cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all group"
+              onClick={() => setDrawerOpen(true)}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-semibold text-gray-700">Drawer</p>
+                <span className="text-xs text-gray-400 group-hover:text-indigo-500 transition-colors">
+                  Click to open →
+                </span>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4 flex justify-end pointer-events-none select-none">
+                <div className="bg-white rounded-lg border border-gray-100 p-3 w-32 shadow-sm">
+                  {[['Components', true], ['Docs', false], ['GitHub', false]].map(([item, active]) => (
                     <div
                       key={item}
-                      className={`drawer-item${activeDrawerItem === item ? ' active' : ''}`}
-                      onClick={() => setActiveDrawerItem(item)}
+                      className={`text-xs px-2 py-1.5 rounded-md mb-1 last:mb-0 font-medium ${
+                        active ? 'bg-gray-900 text-white' : 'text-gray-400'
+                      }`}
                     >
                       {item}
                     </div>
@@ -135,175 +345,143 @@ export default function ComponentShowcase() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* CARDS */}
-        <Divider label="Card" />
-        <div className="card-grid">
-          {[
-            { label: 'Total Users', val: '1,234', sub: '+12% this month', trend: 'up' },
-            { label: 'Revenue',     val: '$5,678', sub: '+8.3% vs last',  trend: 'up' },
-            { label: 'Orders',      val: '89',     sub: '-2 today',       trend: 'down' },
-          ].map(({ label, val, sub, trend }) => (
-            <div key={label} className="mini-card">
-              <div className="mini-card-label">{label}</div>
-              <div className="mini-card-val">{val}</div>
-              <div className={`mini-card-sub ${trend}`}>{sub}</div>
-            </div>
-          ))}
-
-          <div className="mini-card" style={{ gridColumn: '1 / -1' }}>
-            <div className="mini-card-label" style={{ marginBottom: '.5rem' }}>Card Props</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {[
-                { label: 'title',        cls: 'badge-blue'  },
-                { label: 'subtitle',     cls: 'badge-blue'  },
-                { label: 'hoverable',    cls: 'badge-green' },
-                { label: 'headerAction', cls: 'badge-green' },
-                { label: 'padding: sm · md · lg', cls: 'badge-amber' },
-              ].map(({ label, cls }) => (
-                <span key={label} className={`mini-card-badge ${cls}`}>{label}</span>
-              ))}
+          {/* MenuBar live */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-1">MenuBar</p>
+                <p className="text-xs text-gray-400">
+                  Nested submenus · keyboard shortcuts · badge support
+                </p>
+              </div>
+              <MenuBar items={menuItems} position="bottom-right" />
             </div>
           </div>
-        </div>
 
-        {/* INFO BANNER */}
-        <div className="info-banner">
-          <div className="info-icon">
-            <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
-              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 10.5h-1.5v-5h1.5v5zm0-6.5h-1.5V3.5h1.5V5z" fill="#fff" />
+        </div>
+      </section>
+
+      {/* ── FOOTER ─────────────────────────────────────────────────── */}
+      <footer className="max-w-5xl mx-auto px-6 py-10 flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-lg bg-gray-900 flex items-center justify-center">
+            <svg width="12" height="12" fill="none" viewBox="0 0 16 16">
+              <rect x="2" y="2" width="5" height="5" rx="1.5" fill="white"/>
+              <rect x="9" y="2" width="5" height="5" rx="1.5" fill="white" opacity="0.5"/>
+              <rect x="2" y="9" width="5" height="5" rx="1.5" fill="white" opacity="0.5"/>
+              <rect x="9" y="9" width="5" height="5" rx="1.5" fill="white"/>
             </svg>
           </div>
-          <p className="info-text">
-            Sab components <strong>props-driven</strong> hain — sirf prop change karo aur component update ho jata hai. Koi custom CSS zaroori nahi.
+          <span className="text-sm font-semibold text-gray-900">UIKit</span>
+          <span className="text-gray-300 mx-1">·</span>
+          <span className="text-xs text-gray-400">React Component Library</span>
+        </div>
+        <p className="text-xs text-gray-400" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+          MIT License · 2024
+        </p>
+      </footer>
+
+      {/* ── MODAL ──────────────────────────────────────────────────── */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Quick Start"
+        size="md"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Close</Button>
+            <Button onClick={() => setModalOpen(false)}>Got it →</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-500 leading-relaxed">
+            Import any component directly — no setup, no configuration. Each component is
+            self-contained and works out of the box.
           </p>
+
+          <div className="bg-gray-950 rounded-xl p-4 overflow-x-auto">
+            <pre
+              className="text-xs leading-relaxed"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              <span className="text-gray-500">{'// Import what you need'}</span>{'\n'}
+              <span className="text-blue-400">import</span>
+              <span className="text-gray-300">{" { Button, Modal, Card } "}</span>
+              <span className="text-blue-400">from</span>
+              <span className="text-emerald-400">{" './components/ui'"}</span>
+              {'\n\n'}
+              <span className="text-gray-500">{'// Use with props'}</span>{'\n'}
+              <span className="text-gray-300">{'<Button variant="primary" size="lg">'}</span>{'\n'}
+              <span className="text-gray-300">{'  Get Started'}</span>{'\n'}
+              <span className="text-gray-300">{'</Button>'}</span>
+            </pre>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              ['Zero Config',      'Drop in and go'       ],
+              ['TypeScript Ready', 'Full prop types'       ],
+              ['Accessible',       'Keyboard & ARIA'       ],
+              ['Tailwind Native',  'Easy to customize'     ],
+            ].map(([title, sub]) => (
+              <div key={title} className="bg-gray-50 rounded-xl p-3">
+                <p className="text-xs font-semibold text-gray-700 mb-0.5">{title}</p>
+                <p className="text-xs text-gray-400">{sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── DRAWER ─────────────────────────────────────────────────── */}
+      <Drawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title="Components"
+        position="right"
+        width="w-72"
+      >
+        <div className="space-y-0.5">
+          {components.map(({ name, color }) => {
+            const c = colorMap[color]
+            return (
+              <button
+                key={name}
+                onClick={() => setDrawerOpen(false)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors group"
+              >
+                <span className={`w-2 h-2 rounded-full ${c.dot} flex-shrink-0`} />
+                <span className="flex-1 text-left font-medium">{name}</span>
+                <span className="text-gray-200 group-hover:text-gray-400 transition-colors text-xs">→</span>
+              </button>
+            )
+          })}
         </div>
 
-      </div>
-    </>
-  )
-}
+        <div className="mt-8 rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="bg-gray-950 px-4 py-4">
+            <p
+              className="text-xs text-gray-500 mb-2"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              index.js
+            </p>
+            <code
+              className="text-xs text-emerald-400 leading-loose"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              {['Button', 'Navbar', 'Modal', 'Drawer', 'Card', 'MenuBar'].map(n => (
+                <span key={n} className="block">
+                  {'export { '}{n}{' }'}
+                </span>
+              ))}
+            </code>
+          </div>
+        </div>
+      </Drawer>
 
-function Divider({ label }) {
-  return (
-    <div className="divider">
-      <div className="divider-line" />
-      <span className="divider-label">{label}</span>
-      <div className="divider-line" />
     </div>
   )
 }
-
-const styles = `
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --accent: #4f46e5;
-    --surface: #ffffff;
-    --surface2: #f8f8fb;
-    --border: rgba(0,0,0,0.08);
-    --text1: #0f0f1a;
-    --text2: #5a5a7a;
-    --text3: #9898b8;
-    --radius: 12px;
-    --ff: 'DM Sans', sans-serif;
-    --mono: 'DM Mono', monospace;
-  }
-  body { font-family: var(--ff); background: var(--surface2); color: var(--text1); }
-
-  .page { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-
-  /* HERO */
-  .hero { text-align: center; padding: 3rem 0 2.5rem; }
-  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: #eef2ff; color: #4338ca; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 99px; margin-bottom: 1.25rem; letter-spacing: .04em; text-transform: uppercase; }
-  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #4f46e5; display: inline-block; }
-  .hero h1 { font-size: 2.25rem; font-weight: 600; color: var(--text1); line-height: 1.2; margin-bottom: .75rem; }
-  .hero h1 em { font-style: italic; color: var(--accent); }
-  .hero p { color: var(--text2); font-size: 1rem; line-height: 1.6; max-width: 440px; margin: 0 auto 2rem; }
-  .hero-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .chip { font-size: 11px; font-family: var(--mono); background: var(--surface); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; color: var(--text2); }
-
-  /* DIVIDER */
-  .divider { display: flex; align-items: center; gap: 12px; margin: 2.5rem 0 1.5rem; }
-  .divider-label { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); white-space: nowrap; }
-  .divider-line { flex: 1; height: 1px; background: var(--border); }
-
-  .section-title { font-size: .7rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
-
-  /* BUTTONS */
-  .btn-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--ff); font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; transition: all .15s; line-height: 1; }
-  .btn-primary  { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .btn-primary:hover { background: #4338ca; }
-  .btn-secondary { background: #f0f0ff; color: #4338ca; border-color: #e0e0ff; }
-  .btn-secondary:hover { background: #e8e8ff; }
-  .btn-outline { background: transparent; color: var(--text1); border-color: rgba(0,0,0,0.15); }
-  .btn-outline:hover { background: var(--surface2); }
-  .btn-ghost { background: transparent; color: var(--text2); border-color: transparent; }
-  .btn-ghost:hover { background: var(--surface2); color: var(--text1); }
-  .btn-danger { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-  .btn-danger:hover { background: #fee2e2; }
-  .btn-sm { padding: 5px 11px; font-size: 12px; }
-  .btn-lg { padding: 11px 22px; font-size: 15px; }
-
-  /* PROPS TABLE */
-  .props-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  .props-table th { text-align: left; color: var(--text3); font-weight: 500; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
-  .props-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
-  .props-table tr:last-child td { border-bottom: none; }
-  .props-table td:first-child { font-family: var(--mono); color: var(--accent); font-size: 12px; }
-  .type-badge { font-family: var(--mono); font-size: 11px; background: #f0f0ff; color: #6366f1; padding: 1px 6px; border-radius: 4px; }
-
-  /* NAVBAR */
-  .navbar-inner { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.25rem; border-bottom: 1px solid var(--border); }
-  .nav-logo { font-weight: 600; font-size: 15px; color: var(--accent); letter-spacing: -.01em; }
-  .nav-links { display: flex; gap: 1.25rem; }
-  .nav-link { font-size: 12.5px; color: var(--text2); text-decoration: none; }
-  .nav-link.active { color: var(--accent); font-weight: 500; }
-  .nav-actions { display: flex; gap: 6px; }
-  .navbar-body { padding: 1.25rem; background: #fafafa; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text3); }
-  .nb-dot { width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; }
-
-  /* MODAL */
-  .modal-outer { background: rgba(15,15,26,.5); border-radius: var(--radius); padding: 2rem; display: flex; align-items: center; justify-content: center; min-height: 200px; }
-  .modal-box { background: var(--surface); border-radius: var(--radius); width: 100%; max-width: 320px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.15); }
-  .modal-head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .modal-title { font-weight: 500; font-size: 14px; }
-  .modal-x { width: 22px; height: 22px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text2); cursor: pointer; line-height: 1; }
-  .modal-body-preview { padding: 1rem 1.25rem; font-size: 13px; color: var(--text2); line-height: 1.6; }
-  .modal-foot { padding: .75rem 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 6px; }
-
-  /* DRAWER */
-  .drawer-outer { background: rgba(15,15,26,.35); border-radius: var(--radius); min-height: 200px; display: flex; justify-content: flex-end; overflow: hidden; }
-  .drawer-panel { background: var(--surface); width: 180px; padding: 1rem; }
-  .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
-  .drawer-title { font-size: 13px; font-weight: 500; }
-  .drawer-nav { display: flex; flex-direction: column; gap: 2px; }
-  .drawer-item { font-size: 12.5px; color: var(--text2); padding: 7px 10px; border-radius: 7px; cursor: pointer; }
-  .drawer-item:hover { background: var(--surface2); color: var(--text1); }
-  .drawer-item.active { font-weight: 500; color: var(--accent); background: #f0f0ff; }
-
-  /* CARDS */
-  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .mini-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; transition: transform .15s, box-shadow .15s; }
-  .mini-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.06); }
-  .mini-card-label { font-size: 11px; color: var(--text3); margin-bottom: .25rem; }
-  .mini-card-val { font-size: 1.3rem; font-weight: 600; color: var(--text1); }
-  .mini-card-sub { font-size: 11px; margin-top: .25rem; }
-  .up { color: #16a34a; }
-  .down { color: #dc2626; }
-  .mini-card-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 99px; margin-top: .5rem; }
-  .badge-blue  { background: #eff6ff; color: #1d4ed8; }
-  .badge-green { background: #f0fdf4; color: #15803d; }
-  .badge-amber { background: #fffbeb; color: #92400e; }
-
-  /* INFO */
-  .info-banner { margin-top: 2.5rem; padding: 1rem 1.25rem; border-radius: var(--radius); background: #f0f0ff; border: 1px solid #e0e0ff; display: flex; align-items: center; gap: 10px; }
-  .info-icon { width: 28px; height: 28px; border-radius: 8px; background: #4f46e5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .info-text { font-size: 12.5px; color: #4338ca; line-height: 1.5; }
-
-  /* LAYOUT */
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 520px) { .card-grid, .row2 { grid-template-columns: 1fr; } }
-`
